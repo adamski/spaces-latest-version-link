@@ -1,0 +1,7 @@
+packages:
+  - name: latest-installer
+    environment: {}
+    parameters: {}
+    annotations:
+      description: Redirects to the latest installer version in DigitalOcean Spaces
+      web-export: true
