@@ -72,7 +72,8 @@ def main(args):
                 request_data = _extract_request_data(args)
                 file_info = {
                     'file_name': latest['Key'],
-                    'file_url': file_url
+                    'file_url': file_url,
+                    'source_url': request_data.get('referrer', '')  # Landing page URL
                 }
                 send_conversion_events(request_data, file_info)
             except Exception as e:
@@ -125,9 +126,11 @@ def find_latest_version(files):
 def _extract_request_data(args):
     """
     Extract request data for conversion tracking.
-    DigitalOcean Functions provide request info in __ow_headers and other special keys.
+    DigitalOcean Functions provide request info in the 'http' key.
     """
-    headers = args.get('__ow_headers', {})
+    # Use modern API (http.headers) with fallback to deprecated __ow_headers
+    http_data = args.get('http', {})
+    headers = http_data.get('headers', args.get('__ow_headers', {}))
 
     return {
         'ip': headers.get('x-forwarded-for', '').split(',')[0].strip(),

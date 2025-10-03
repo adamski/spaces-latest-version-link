@@ -80,6 +80,35 @@ When `track=all` is present, the function will send conversion events to all con
 
 **Note:** Tracking is opt-in via URL parameter, so you can share clean URLs by default and only enable tracking for specific campaigns or landing pages.
 
+#### Improving Match Quality with Facebook Cookies
+
+For better Facebook event matching, pass the Facebook browser ID (`_fbp`) and click ID (`_fbc`) cookies from your landing page:
+
+```javascript
+// On your landing page (before download link)
+<script>
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+// Get Facebook cookies set by your Facebook Pixel
+const fbp = getCookie('_fbp');
+const fbc = getCookie('_fbc');
+
+// Update download link
+const downloadUrl = new URL('https://your-function-url');
+downloadUrl.searchParams.set('track', 'all');
+if (fbp) downloadUrl.searchParams.set('fbp', fbp);
+if (fbc) downloadUrl.searchParams.set('fbc', fbc);
+
+document.getElementById('download-link').href = downloadUrl.toString();
+</script>
+```
+
+This ensures server-side events are properly matched with client-side pixel events for accurate attribution and deduplication.
+
 ## How It Works
 
 1. Lists objects in the specified Spaces bucket/folder

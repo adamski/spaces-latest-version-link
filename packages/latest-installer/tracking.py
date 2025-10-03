@@ -16,13 +16,14 @@ def send_conversion_events(request_data, file_info):
         request_data: Dictionary containing request information:
             - ip: Client IP address
             - user_agent: User agent string
-            - referrer: HTTP referrer
+            - referrer: HTTP referrer (landing page URL)
             - fbp: Facebook browser ID cookie (_fbp)
             - fbc: Facebook click ID cookie (_fbc)
             - fbclid: Facebook click ID from URL
         file_info: Dictionary containing file information:
             - file_name: Name of the file being downloaded
             - file_url: URL of the file
+            - source_url: Landing page URL (where the click happened)
     """
     events_sent = []
 
@@ -71,12 +72,14 @@ def _send_facebook_event(request_data, file_info):
     )
 
     # Create event
+    # Use landing page URL (source_url) where click happened, not file URL
+    source_url = file_info.get('source_url') or file_info.get('file_url')
     event = Event(
         event_name=event_name,
         event_time=int(time.time()),
         user_data=user_data,
         custom_data=custom_data,
-        event_source_url=file_info.get('file_url'),
+        event_source_url=source_url,
         action_source='website'
     )
 
