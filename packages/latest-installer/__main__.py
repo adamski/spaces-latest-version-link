@@ -2,6 +2,7 @@ import os
 import re
 import boto3
 from packaging import version
+from tracking import send_conversion_events
 
 
 def main(args):
@@ -12,11 +13,13 @@ def main(args):
     - bucket: Spaces bucket name (optional, defaults to env var)
     - prefix: Folder prefix to search in (optional)
     - pattern: Regex pattern to match files (optional, defaults to all files)
+    - track: Enable conversion tracking (e.g., 'all')
     """
     # Get configuration from args or environment
     bucket = args.get('bucket', os.environ.get('SPACES_BUCKET'))
     prefix = args.get('prefix', os.environ.get('SPACES_PREFIX', ''))
     pattern = args.get('pattern', os.environ.get('FILE_PATTERN', r'.*'))
+    track_enabled = args.get('track')
 
     if not bucket:
         return {
@@ -63,6 +66,19 @@ def main(args):
         # Build URL
         file_url = f"https://{bucket}.{region}.digitaloceanspaces.com/{latest['Key']}"
 
+        # Send conversion tracking if enabled
+        if track_enabled:
+            try:
+                request_data = _extract_request_data(args)
+                file_info = {
+                    'file_name': latest['Key'],
+                    'file_url': file_url
+                }
+                send_conversion_events(request_data, file_info)
+            except Exception as e:
+                # Don't break redirect if tracking fails
+                print(f"Tracking error: {e}")
+
         # Return redirect
         return {
             'statusCode': 302,
@@ -104,3 +120,20 @@ def find_latest_version(files):
     # Fall back to last modified timestamp
     files.sort(key=lambda x: x['LastModified'], reverse=True)
     return files[0]
+
+
+def _extract_request_data(args):
+    """
+    Extract request data for conversion tracking.
+    DigitalOcean Functions provide request info in __ow_headers and other special keys.
+    """
+    headers = args.get('__ow_headers', {})
+
+    return {
+        'ip': headers.get('x-forwarded-for', '').split(',')[0].strip(),
+        'user_agent': headers.get('user-agent', ''),
+        'referrer': headers.get('referer', ''),
+        'fbp': args.get('fbp'),  # Facebook browser ID from query param or cookie
+        'fbc': args.get('fbc'),  # Facebook click ID from query param or cookie
+        'fbclid': args.get('fbclid')  # Facebook click ID from URL
+    }
