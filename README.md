@@ -19,6 +19,12 @@ SPACES_REGION=nyc3
 SPACES_BUCKET=your-bucket-name      # Optional: can be passed as query param
 SPACES_PREFIX=installers/            # Optional: folder prefix
 FILE_PATTERN=.*\.(exe|dmg|deb|rpm)$  # Optional: regex to filter files
+
+# Facebook Conversions API (optional - only used when ?track=all is present)
+FB_PIXEL_ID=your_facebook_pixel_id
+FB_ACCESS_TOKEN=your_facebook_access_token
+FB_EVENT_NAME=Lead                   # Default event name
+FB_TEST_EVENT_CODE=TEST12345         # Optional: for testing events
 ```
 
 ## Get Function URL
@@ -51,11 +57,28 @@ Override defaults with query parameters:
 - `?bucket=my-bucket` - Specify bucket name
 - `?prefix=installers/windows/` - Search in specific folder
 - `?pattern=\.exe$` - Filter files by regex pattern
+- `?track=all` - Enable conversion tracking to all configured platforms
 
 Example:
 ```
 https://your-function-url?prefix=installers/mac/&pattern=\.dmg$
 ```
+
+### Conversion Tracking
+
+Add `?track=all` to enable conversion tracking:
+
+```html
+<!-- No tracking (default) -->
+<a href="https://your-function-url">Download</a>
+
+<!-- With tracking enabled -->
+<a href="https://your-function-url?track=all">Download</a>
+```
+
+When `track=all` is present, the function will send conversion events to all configured platforms (currently Facebook Conversions API). Events are only sent if the platform credentials are configured in environment variables.
+
+**Note:** Tracking is opt-in via URL parameter, so you can share clean URLs by default and only enable tracking for specific campaigns or landing pages.
 
 ## How It Works
 
