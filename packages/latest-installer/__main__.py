@@ -2,7 +2,14 @@ import os
 import re
 import boto3
 from packaging import version
-from tracking import send_conversion_events
+
+# Import tracking module from same directory
+try:
+    from .tracking import send_conversion_events
+except ImportError:
+    # Fallback for direct execution or DigitalOcean Functions
+    import tracking
+    send_conversion_events = tracking.send_conversion_events
 
 
 def main(args):
