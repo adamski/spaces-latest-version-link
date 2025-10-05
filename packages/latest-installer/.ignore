@@ -1,0 +1,5 @@
+build.sh
+requirements.txt
+virtualenv/
+*.pyc
+__pycache__/
