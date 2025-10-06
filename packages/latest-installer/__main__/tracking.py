@@ -32,15 +32,20 @@ def send_conversion_events(request_data, file_info):
             - file_url: URL of the file
             - source_url: Landing page URL (where the click happened)
     """
+    print("[DEBUG] send_conversion_events called")
     events_sent = []
 
     # Try Facebook Conversions API
     if _is_facebook_configured():
+        print("[DEBUG] Facebook configured, sending event")
         try:
             _send_facebook_event(request_data, file_info)
+            print("[DEBUG] Facebook event sent successfully")
             events_sent.append('facebook')
         except Exception as e:
             print(f"Facebook tracking error: {e}")
+    else:
+        print("[DEBUG] Facebook not configured, skipping")
 
     return events_sent
 
@@ -56,6 +61,7 @@ def _is_facebook_configured():
 
 def _send_facebook_event(request_data, file_info):
     """Send conversion event to Facebook Conversions API."""
+    print("[DEBUG] _send_facebook_event called")
     if not FACEBOOK_SDK_AVAILABLE:
         raise ImportError("facebook-business SDK not available")
 
@@ -63,6 +69,7 @@ def _send_facebook_event(request_data, file_info):
     access_token = os.environ.get('FB_ACCESS_TOKEN')
     event_name = os.environ.get('FB_EVENT_NAME', 'Lead')
 
+    print(f"[DEBUG] Initializing Facebook API with pixel_id={pixel_id}, event_name={event_name}")
     # Initialize Facebook API
     FacebookAdsApi.init(access_token=access_token)
 
@@ -119,7 +126,9 @@ def _send_facebook_event(request_data, file_info):
     if test_event_code:
         event_request.test_event_code = test_event_code
 
+    print(f"[DEBUG] Executing Facebook event request to API...")
     event_response = event_request.execute()
+    print(f"[DEBUG] Facebook API responded successfully")
     return event_response
 
 

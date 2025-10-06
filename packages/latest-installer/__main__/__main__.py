@@ -15,11 +15,16 @@ def main(args):
     - pattern: Regex pattern to match files (optional, defaults to all files)
     - track: Enable conversion tracking (e.g., 'all')
     """
+    print(f"[DEBUG] Function called with args keys: {list(args.keys())}")
+
     # Get configuration from args or environment
     bucket = args.get('bucket', os.environ.get('SPACES_BUCKET'))
     prefix = args.get('prefix', os.environ.get('SPACES_PREFIX', ''))
     pattern = args.get('pattern', os.environ.get('FILE_PATTERN', r'.*'))
     track_enabled = args.get('track')
+
+    print(f"[DEBUG] Config - bucket={bucket}, prefix={prefix}, pattern={pattern}, track={track_enabled}")
+    print(f"[DEBUG] Credentials present - SPACES_KEY={'Yes' if os.environ.get('SPACES_KEY') else 'No'}, SPACES_SECRET={'Yes' if os.environ.get('SPACES_SECRET') else 'No'}")
 
     if not bucket:
         return {
@@ -29,6 +34,7 @@ def main(args):
 
     # Initialize S3 client for DigitalOcean Spaces
     region = os.environ.get('SPACES_REGION', 'nyc3')
+    print(f"[DEBUG] Initializing S3 client for region={region}")
     s3_client = boto3.client(
         's3',
         region_name=region,
@@ -39,7 +45,9 @@ def main(args):
 
     try:
         # List objects in bucket
+        print(f"[DEBUG] Calling S3 list_objects_v2(Bucket={bucket}, Prefix={prefix})")
         response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
+        print(f"[DEBUG] S3 call succeeded, response keys: {list(response.keys())}")
 
         if 'Contents' not in response or len(response['Contents']) == 0:
             return {
@@ -53,6 +61,7 @@ def main(args):
             obj for obj in response['Contents']
             if file_pattern.search(obj['Key'])
         ]
+        print(f"[DEBUG] Found {len(matching_files)} files matching pattern")
 
         if not matching_files:
             return {
@@ -62,12 +71,14 @@ def main(args):
 
         # Find latest version
         latest = find_latest_version(matching_files)
+        print(f"[DEBUG] Latest file: {latest['Key']}")
 
         # Build URL
         file_url = f"https://{bucket}.{region}.digitaloceanspaces.com/{latest['Key']}"
 
         # Send conversion tracking if enabled
         if track_enabled:
+            print(f"[DEBUG] Tracking enabled, calling send_conversion_events")
             try:
                 request_data = _extract_request_data(args)
                 file_info = {
@@ -76,11 +87,13 @@ def main(args):
                     'source_url': request_data.get('referrer', '')  # Landing page URL
                 }
                 send_conversion_events(request_data, file_info)
+                print(f"[DEBUG] Tracking completed successfully")
             except Exception as e:
                 # Don't break redirect if tracking fails
                 print(f"Tracking error: {e}")
 
         # Return redirect
+        print(f"[DEBUG] Returning 302 redirect to: {file_url}")
         return {
             'statusCode': 302,
             'headers': {
@@ -89,6 +102,7 @@ def main(args):
         }
 
     except Exception as e:
+        print(f"[DEBUG] Exception caught: {type(e).__name__}: {str(e)}")
         return {
             'statusCode': 500,
             'body': {'error': str(e)}
