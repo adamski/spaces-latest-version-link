@@ -7,5 +7,5 @@ packages:
       web-export: true
     functions:
       - name: __main__
-        main: __main__.py
+        main: main
         runtime: python:default
