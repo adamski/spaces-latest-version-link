@@ -1,11 +1,25 @@
 import os
 import re
 import sys
-import boto3
-from packaging import version
 
-# Write to stderr to ensure visibility even if stdout is not captured
-sys.stderr.write("[EARLY-DEBUG] Module loading started\n")
+# CRITICAL: Log immediately after sys import, before any imports that can fail
+sys.stderr.write("[CRITICAL] Module loading started (very first line)\n")
+
+# Import boto3 with error handling
+try:
+    import boto3
+    sys.stderr.write("[CRITICAL] boto3 imported successfully\n")
+except ImportError as e:
+    sys.stderr.write(f"[CRITICAL] FAILED to import boto3: {e}\n")
+    raise
+
+# Import packaging with error handling
+try:
+    from packaging import version
+    sys.stderr.write("[CRITICAL] packaging imported successfully\n")
+except ImportError as e:
+    sys.stderr.write(f"[CRITICAL] FAILED to import packaging: {e}\n")
+    raise
 
 try:
     from tracking import send_conversion_events

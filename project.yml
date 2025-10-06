@@ -8,4 +8,6 @@ packages:
     functions:
       - name: __main__
         main: main
-        runtime: python:default
+        runtime: python:3.9
+        limits:
+          memory: 512
