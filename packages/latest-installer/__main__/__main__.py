@@ -1,8 +1,21 @@
 import os
 import re
+import sys
 import boto3
 from packaging import version
-from tracking import send_conversion_events
+
+# Write to stderr to ensure visibility even if stdout is not captured
+sys.stderr.write("[EARLY-DEBUG] Module loading started\n")
+
+try:
+    from tracking import send_conversion_events
+    sys.stderr.write("[EARLY-DEBUG] Successfully imported tracking module\n")
+except Exception as e:
+    sys.stderr.write(f"[EARLY-DEBUG] CRITICAL: Failed to import tracking: {type(e).__name__}: {e}\n")
+    # Provide fallback to prevent function from crashing
+    def send_conversion_events(request_data, file_info):
+        sys.stderr.write("[ERROR] Tracking not available due to import failure\n")
+        return []
 
 
 def main(args):
@@ -15,6 +28,8 @@ def main(args):
     - pattern: Regex pattern to match files (optional, defaults to all files)
     - track: Enable conversion tracking (e.g., 'all')
     """
+    # Use both stderr and stdout to maximize visibility
+    sys.stderr.write(f"[EARLY-DEBUG] main() called with {len(args)} args\n")
     print(f"[DEBUG] Function called with args keys: {list(args.keys())}")
 
     # Get configuration from args or environment
@@ -45,8 +60,10 @@ def main(args):
 
     try:
         # List objects in bucket
+        sys.stderr.write(f"[EARLY-DEBUG] About to call S3 list_objects_v2\n")
         print(f"[DEBUG] Calling S3 list_objects_v2(Bucket={bucket}, Prefix={prefix})")
         response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
+        sys.stderr.write(f"[EARLY-DEBUG] S3 call completed\n")
         print(f"[DEBUG] S3 call succeeded, response keys: {list(response.keys())}")
 
         if 'Contents' not in response or len(response['Contents']) == 0:
@@ -102,6 +119,7 @@ def main(args):
         }
 
     except Exception as e:
+        sys.stderr.write(f"[EARLY-DEBUG] EXCEPTION: {type(e).__name__}: {str(e)}\n")
         print(f"[DEBUG] Exception caught: {type(e).__name__}: {str(e)}")
         return {
             'statusCode': 500,
