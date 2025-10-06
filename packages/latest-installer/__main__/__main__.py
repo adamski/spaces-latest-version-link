@@ -132,11 +132,23 @@ def _extract_request_data(args):
     http_data = args.get('http', {})
     headers = http_data.get('headers', args.get('__ow_headers', {}))
 
+    # Extract UTM parameters from query string
+    utm_params = {
+        'utm_source': args.get('utm_source'),
+        'utm_medium': args.get('utm_medium'),
+        'utm_campaign': args.get('utm_campaign'),
+        'utm_term': args.get('utm_term'),
+        'utm_content': args.get('utm_content'),
+    }
+    # Remove None values
+    utm_params = {k: v for k, v in utm_params.items() if v is not None}
+
     return {
         'ip': headers.get('x-forwarded-for', '').split(',')[0].strip(),
         'user_agent': headers.get('user-agent', ''),
         'referrer': headers.get('referer', ''),
         'fbp': args.get('fbp'),  # Facebook browser ID from query param or cookie
         'fbc': args.get('fbc'),  # Facebook click ID from query param or cookie
-        'fbclid': args.get('fbclid')  # Facebook click ID from URL
+        'fbclid': args.get('fbclid'),  # Facebook click ID from URL
+        'utm_params': utm_params  # UTM tracking parameters
     }

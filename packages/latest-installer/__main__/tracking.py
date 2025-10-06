@@ -26,6 +26,7 @@ def send_conversion_events(request_data, file_info):
             - fbp: Facebook browser ID cookie (_fbp)
             - fbc: Facebook click ID cookie (_fbc)
             - fbclid: Facebook click ID from URL
+            - utm_params: Dict of UTM parameters (utm_source, utm_medium, etc.)
         file_info: Dictionary containing file information:
             - file_name: Name of the file being downloaded
             - file_url: URL of the file
@@ -78,11 +79,18 @@ def _send_facebook_event(request_data, file_info):
         user_data.email = _hash_value(request_data['email'])
 
     # Build custom data
-    custom_data = CustomData(
-        content_name=file_info.get('file_name'),
-        value=1.0,
-        currency='USD'
-    )
+    custom_data_kwargs = {
+        'content_name': file_info.get('file_name'),
+        'value': 1.0,
+        'currency': 'USD'
+    }
+
+    # Add UTM parameters if present
+    utm_params = request_data.get('utm_params', {})
+    if utm_params:
+        custom_data_kwargs['custom_properties'] = utm_params
+
+    custom_data = CustomData(**custom_data_kwargs)
 
     # Create event
     # Use landing page URL (source_url) where click happened, not file URL

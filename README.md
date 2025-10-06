@@ -113,6 +113,31 @@ document.getElementById('download-link').href = downloadUrl.toString();
 
 This ensures server-side events are properly matched with client-side pixel events for accurate attribution and deduplication.
 
+#### UTM Parameter Tracking
+
+UTM parameters are automatically captured and sent to Facebook Conversions API for campaign attribution:
+
+```html
+<!-- Track download with campaign attribution -->
+<a href="https://your-function-url?track=all&utm_source=facebook&utm_medium=cpc&utm_campaign=spring_sale">
+  Download Latest Version
+</a>
+```
+
+**Supported UTM Parameters:**
+- `utm_source` - Campaign source (e.g., facebook, google, newsletter)
+- `utm_medium` - Campaign medium (e.g., cpc, email, social)
+- `utm_campaign` - Campaign name (e.g., spring_sale_2025)
+- `utm_term` - Paid search keyword (optional)
+- `utm_content` - Ad variation identifier (optional)
+
+UTM parameters are sent to Facebook as custom properties in the conversion event, allowing you to analyze campaign performance in Facebook Events Manager and Ads Manager.
+
+**Example with full tracking:**
+```
+https://your-function-url?track=all&utm_source=facebook&utm_medium=cpc&utm_campaign=spring_sale&fbp=fb.1.123456789&fbc=fb.1.987654321
+```
+
 ## How It Works
 
 1. Lists objects in the specified Spaces bucket/folder
