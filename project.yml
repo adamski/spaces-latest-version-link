@@ -5,3 +5,9 @@ packages:
     annotations:
       description: Redirects to the latest installer version in DigitalOcean Spaces
       web-export: true
+    functions:
+      - name: __main__
+        main: main
+        runtime: python:3.9
+        limits:
+          memory: 512
