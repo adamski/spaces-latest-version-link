@@ -4,9 +4,13 @@ DigitalOcean Function that redirects to the latest installer version in a Digita
 
 ## Deployment
 
+Deploy using the `--remote-build` flag to ensure Python dependencies are properly installed:
+
 ```bash
-doctl serverless deploy .
+doctl serverless deploy . --remote-build
 ```
+
+The `--remote-build` flag tells DigitalOcean to build the function remotely, which handles `requirements.txt` installation automatically without needing a local build script.
 
 ## Configuration
 
