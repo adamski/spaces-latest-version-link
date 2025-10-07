@@ -58,6 +58,7 @@ test_args = {
     'utm_source': 'test',
     'utm_campaign': 'local_test',
     'utm_medium': 'terminal',
+    'email': 'test@test.com',
 
     # Simulate DigitalOcean HTTP headers (required for Facebook matching)
     # In production, DigitalOcean provides these automatically

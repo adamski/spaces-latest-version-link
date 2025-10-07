@@ -196,5 +196,6 @@ def _extract_request_data(args):
         'fbp': args.get('fbp'),  # Facebook browser ID from query param or cookie
         'fbc': args.get('fbc'),  # Facebook click ID from query param or cookie
         'fbclid': args.get('fbclid'),  # Facebook click ID from URL
+        'email': args.get('email'),  # User email for better matching (will be hashed)
         'utm_params': utm_params  # UTM tracking parameters
     }
